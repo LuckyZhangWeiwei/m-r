@@ -39,34 +39,48 @@ namespace SimpleCQRS
 
         public void ChangeName(string newName)
         {
-            if (string.IsNullOrEmpty(newName)) throw new ArgumentException("newName");
+            if (string.IsNullOrEmpty(newName))
+                throw new ArgumentException("newName");
             ApplyChange(new InventoryItemRenamed(_id, newName));
         }
 
         public void Remove(int count)
         {
-            if (count <= 0) throw new InvalidOperationException("cant remove negative count from inventory");
-            if (AvailableQty - count < 0) throw new InvalidOperationException("Cannot remove a count greater than the available quantity");
+            if (count <= 0)
+                throw new InvalidOperationException("cant remove negative count from inventory");
+            if (AvailableQty - count < 0)
+                throw new InvalidOperationException(
+                    "Cannot remove a count greater than the available quantity"
+                );
             ApplyChange(new ItemsRemovedFromInventory(_id, count));
         }
 
         public void CheckIn(int count)
         {
-            if (count <= 0) throw new InvalidOperationException("must have a count greater than 0 to add to inventory");
-            if (AvailableQty + count > MaxQty) throw new InvalidOperationException("Checked in count will exceed Max Qty");
+            if (count <= 0)
+                throw new InvalidOperationException(
+                    "must have a count greater than 0 to add to inventory"
+                );
+            if (AvailableQty + count > MaxQty)
+                throw new InvalidOperationException("Checked in count will exceed Max Qty");
             ApplyChange(new ItemsCheckedInToInventory(_id, count));
         }
 
         public void ChangeMaxQty(int newMaxQty)
         {
-            if (newMaxQty <= 0) throw new InvalidOperationException("New Max Qty must be larger than 0");
-            if (newMaxQty < AvailableQty) throw new InvalidOperationException("New Max Qty cannot be less than Available Qty");
+            if (newMaxQty <= 0)
+                throw new InvalidOperationException("New Max Qty must be larger than 0");
+            if (newMaxQty < AvailableQty)
+                throw new InvalidOperationException(
+                    "New Max Qty cannot be less than Available Qty"
+                );
             ApplyChange(new MaxQtyChanged(_id, newMaxQty));
         }
 
         public void Deactivate()
         {
-            if (!_activated) throw new InvalidOperationException("already deactivated");
+            if (!_activated)
+                throw new InvalidOperationException("already deactivated");
             ApplyChange(new InventoryItemDeactivated(_id));
         }
 
@@ -105,7 +119,8 @@ namespace SimpleCQRS
 
         public void LoadsFromHistory(IEnumerable<Event> history)
         {
-            foreach (var e in history) ApplyChange(e, false);
+            foreach (var e in history)
+                ApplyChange(e, false);
         }
 
         protected void ApplyChange(Event @event)
@@ -117,17 +132,20 @@ namespace SimpleCQRS
         private void ApplyChange(Event @event, bool isNew)
         {
             this.AsDynamic().Apply(@event);
-            if (isNew) _changes.Add(@event);
+            if (isNew)
+                _changes.Add(@event);
         }
     }
 
-    public interface IRepository<T> where T : AggregateRoot, new()
+    public interface IRepository<T>
+        where T : AggregateRoot, new()
     {
         void Save(AggregateRoot aggregate, int expectedVersion);
         T GetById(Guid id);
     }
 
-    public class Repository<T> : IRepository<T> where T : AggregateRoot, new() //shortcut you can do as you see fit with new()
+    public class Repository<T> : IRepository<T>
+        where T : AggregateRoot, new() //shortcut you can do as you see fit with new()
     {
         private readonly IEventStore _storage;
 
@@ -143,11 +161,10 @@ namespace SimpleCQRS
 
         public T GetById(Guid id)
         {
-            var obj = new T();//lots of ways to do this
+            var obj = new T(); //lots of ways to do this
             var e = _storage.GetEventsForAggregate(id);
             obj.LoadsFromHistory(e);
             return obj;
         }
     }
-
 }

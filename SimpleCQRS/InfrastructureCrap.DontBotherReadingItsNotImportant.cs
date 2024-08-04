@@ -9,13 +9,12 @@ using System.Text;
 
 namespace SimpleCQRS
 {
-
     //FROM http://blogs.msdn.com/b/davidebb/archive/2010/01/18/use-c-4-0-dynamic-to-drastically-simplify-your-private-reflection-code.aspx
     //doesnt count to line counts :)
     class PrivateReflectionDynamicObject : DynamicObject
     {
-
-        private static IDictionary<Type, IDictionary<string, IProperty>> _propertiesOnType = new ConcurrentDictionary<Type, IDictionary<string, IProperty>>();
+        private static IDictionary<Type, IDictionary<string, IProperty>> _propertiesOnType =
+            new ConcurrentDictionary<Type, IDictionary<string, IProperty>>();
 
         // Simple abstraction to make field and property access consistent
         interface IProperty
@@ -32,10 +31,7 @@ namespace SimpleCQRS
 
             string IProperty.Name
             {
-                get
-                {
-                    return PropertyInfo.Name;
-                }
+                get { return PropertyInfo.Name; }
             }
 
             object IProperty.GetValue(object obj, object[] index)
@@ -56,12 +52,8 @@ namespace SimpleCQRS
 
             string IProperty.Name
             {
-                get
-                {
-                    return FieldInfo.Name;
-                }
+                get { return FieldInfo.Name; }
             }
-
 
             object IProperty.GetValue(object obj, object[] index)
             {
@@ -74,9 +66,9 @@ namespace SimpleCQRS
             }
         }
 
-
         private object RealObject { get; set; }
-        private const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const BindingFlags bindingFlags =
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         internal static object WrapObjectIfNeeded(object o)
         {
@@ -131,7 +123,11 @@ namespace SimpleCQRS
         }
 
         // Called when a method is called
-        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+        public override bool TryInvokeMember(
+            InvokeMemberBinder binder,
+            object[] args,
+            out object result
+        )
         {
             result = InvokeMemberOnType(RealObject.GetType(), RealObject, binder.Name, args);
 
@@ -177,8 +173,12 @@ namespace SimpleCQRS
             var propNames = typeProperties.Keys.Where(name => name[0] != '<').OrderBy(name => name);
             throw new ArgumentException(
                 String.Format(
-                "The property {0} doesn't exist on type {1}. Supported properties are: {2}",
-                propertyName, RealObject.GetType(), String.Join(", ", propNames)));
+                    "The property {0} doesn't exist on type {1}. Supported properties are: {2}",
+                    propertyName,
+                    RealObject.GetType(),
+                    String.Join(", ", propNames)
+                )
+            );
         }
 
         private static IDictionary<string, IProperty> GetTypeProperties(Type type)
@@ -195,13 +195,18 @@ namespace SimpleCQRS
             typeProperties = new ConcurrentDictionary<string, IProperty>();
 
             // First, add all the properties
-            foreach (PropertyInfo prop in type.GetProperties(bindingFlags).Where(p => p.DeclaringType == type))
+            foreach (
+                PropertyInfo prop in type.GetProperties(bindingFlags)
+                    .Where(p => p.DeclaringType == type)
+            )
             {
                 typeProperties[prop.Name] = new Property() { PropertyInfo = prop };
             }
 
             // Now, add all the fields
-            foreach (FieldInfo field in type.GetFields(bindingFlags).Where(p => p.DeclaringType == type))
+            foreach (
+                FieldInfo field in type.GetFields(bindingFlags).Where(p => p.DeclaringType == type)
+            )
             {
                 typeProperties[field.Name] = new Field() { FieldInfo = field };
             }
@@ -221,7 +226,12 @@ namespace SimpleCQRS
             return typeProperties;
         }
 
-        private static object InvokeMemberOnType(Type type, object target, string name, object[] args)
+        private static object InvokeMemberOnType(
+            Type type,
+            object target,
+            string name,
+            object[] args
+        )
         {
             try
             {
@@ -231,7 +241,8 @@ namespace SimpleCQRS
                     BindingFlags.InvokeMethod | bindingFlags,
                     null,
                     target,
-                    args);
+                    args
+                );
             }
             catch (MissingMethodException)
             {
@@ -245,7 +256,6 @@ namespace SimpleCQRS
             }
         }
     }
-
 
     public static class PrivateReflectionDynamicObjectExtensions
     {

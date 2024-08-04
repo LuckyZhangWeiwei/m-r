@@ -1,11 +1,11 @@
 using System;
+
 namespace SimpleCQRS
 {
-    public class Command : Message
-    {
-    }
+    public class Command : Message { }
 
-    public class DeactivateInventoryItem : Command {
+    public class DeactivateInventoryItem : Command
+    {
         public readonly Guid InventoryItemId;
         public readonly int OriginalVersion;
 
@@ -16,7 +16,8 @@ namespace SimpleCQRS
         }
     }
 
-    public class CreateInventoryItem : Command {
+    public class CreateInventoryItem : Command
+    {
         public readonly Guid InventoryItemId;
         public readonly string Name;
 
@@ -27,7 +28,8 @@ namespace SimpleCQRS
         }
     }
 
-    public class RenameInventoryItem : Command {
+    public class RenameInventoryItem : Command
+    {
         public readonly Guid InventoryItemId;
         public readonly string NewName;
         public readonly int OriginalVersion;
@@ -40,19 +42,22 @@ namespace SimpleCQRS
         }
     }
 
-    public class CheckInItemsToInventory : Command {
+    public class CheckInItemsToInventory : Command
+    {
         public Guid InventoryItemId;
         public readonly int Count;
         public readonly int OriginalVersion;
 
-        public CheckInItemsToInventory(Guid inventoryItemId, int count, int originalVersion) {
+        public CheckInItemsToInventory(Guid inventoryItemId, int count, int originalVersion)
+        {
             InventoryItemId = inventoryItemId;
             Count = count;
             OriginalVersion = originalVersion;
         }
     }
 
-    public class RemoveItemsFromInventory : Command {
+    public class RemoveItemsFromInventory : Command
+    {
         public Guid InventoryItemId;
         public readonly int Count;
         public readonly int OriginalVersion;
@@ -64,6 +69,7 @@ namespace SimpleCQRS
             OriginalVersion = originalVersion;
         }
     }
+
     public class ChangeMaxQty : Command
     {
         public Guid InventoryItemId;
